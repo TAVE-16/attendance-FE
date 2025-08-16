@@ -56,14 +56,11 @@ function Home() {
 
     return (
         <div className='flex flex-col items-center justify-center w-screen'>
-            <img src={Logo} alt="logo" />
+            <img src={Logo} alt="logo" className='w-96' />
             
             {!isEventStarted ? (
                 <div className="text-center">
-                    <h1 className='text-2xl font-bold mb-4'>행사 시작 전입니다.</h1>
-                    <p className="text-gray-600">
-                        행사 시작 시간: {eventStartTime?.toLocaleString('ko-KR')}
-                    </p>
+                    <h1 className='text-4xl font-semibold mb-4'>행사 시작 전입니다.</h1>
                 </div>
             ) : (
                 <Password />

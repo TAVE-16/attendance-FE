@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import PWIcon1 from '../assets/Vector 3.png'
-import PWIcon2 from '../assets/Vector 4.png'
-import PWIcon3 from '../assets/Vector 7.png'
-import PWIcon4 from '../assets/Vector 8.png'
-import PWIcon5 from '../assets/Vector 9.png'
+import PWIcon1 from '../assets/pwIcon1.png'
+import PWIcon2 from '../assets/pwIcon2.png'
+import PWIcon3 from '../assets/pwIcon3.png'
+import PWIcon4 from '../assets/pwIcon4.png'
 import Modal from './modal.jsx'
 
 function Password() {
@@ -62,7 +61,7 @@ function Password() {
         if (fullPassword.length === 8) {
             // 000000 에러 체크-> 나중에 없는 번호일때 띄우기
             if (fullPassword === '00000000') {
-                setErrorMessage('존재하지 않는 번호입니다.');
+                setErrorMessage('번호를 다시 입력하세요!');
                 return;
             }
             
@@ -99,39 +98,74 @@ function Password() {
     };
 
     const getIconForIndex = (index) => {
-        const icons = [PWIcon1, PWIcon2, PWIcon3, PWIcon4, PWIcon5, PWIcon1, PWIcon2, PWIcon3];
+        const icons = [PWIcon1, PWIcon2, PWIcon3, PWIcon4, PWIcon1, PWIcon2, PWIcon3, PWIcon4, ];
         return icons[index] || PWIcon1;
     };
 
     return (
-        <div className="text-center">
-            <h1 className='text-2xl font-bold mb-4 text-black'>전화번호 입력</h1>
-            <div className="flex items-center justify-center gap-3 mb-6">
-                {password.map((digit, index) => (
-                    <div key={index} className="relative">
-                        {digit ? (
-                            <div className="w-12 h-12 flex items-center justify-center">
-                                <img 
-                                    src={getIconForIndex(index)} 
-                                    alt={`icon-${index}`}
-                                    className="w-8 h-8"
+        <div className="text-center flex flex-col items-center justify-center">
+            <h1 className='text-2xl font-semibold text-white mt-10' >전화번호 8자리를 입력하세요.</h1>
+            <div className="flex items-center justify-center gap-3 mt-10">
+                {/* 첫 번째 그룹: 0-3번 인덱스 */}
+                <div className="flex items-center gap-3">
+                    {password.slice(0, 4).map((digit, index) => (
+                        <div key={index} className="relative ">
+                            {digit ? (
+                                <div className="w-12 h-12 flex items-center justify-center">
+                                    <img 
+                                        src={getIconForIndex(index)} 
+                                        alt={`icon-${index}`}
+                                        className="w-10 h-10"
+                                    />
+                                </div>
+                            ) : (
+                                <input
+                                    id={`input-${index}`}
+                                    type="text"
+                                    maxLength={1}
+                                    value={digit}
+                                    onChange={(e) => handleInputChange(index, e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(index, e)}
+                                    className="w-12 h-12 text-center text-xl font-bold border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-200"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                 />
-                            </div>
-                        ) : (
-                            <input
-                                id={`input-${index}`}
-                                type="text"
-                                maxLength={1}
-                                value={digit}
-                                onChange={(e) => handleInputChange(index, e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                                className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-full bg-white text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                            />
-                        )}
-                    </div>
-                ))}
+                            )}
+                        </div>
+                    ))}
+                </div>
+                
+                {/* 그룹 간 간격 */}
+                <div className="w-8"></div>
+                
+                {/* 두 번째 그룹: 4-7번 인덱스 */}
+                <div className="flex items-center gap-3">
+                    {password.slice(4, 8).map((digit, index) => (
+                        <div key={index + 4} className="relative ">
+                            {digit ? (
+                                <div className="w-12 h-12 flex items-center justify-center">
+                                    <img 
+                                        src={getIconForIndex(index + 4)} 
+                                        alt={`icon-${index + 4}`}
+                                        className="w-10 h-10"
+                                    />
+                                </div>
+                            ) : (
+                                <input
+                                    id={`input-${index + 4}`}
+                                    type="text"
+                                    maxLength={1}
+                                    value={digit}
+                                    onChange={(e) => handleInputChange(index + 4, e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(index + 4, e)}
+                                    className="w-12 h-12 text-center text-xl font-bold border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 transition-all duration-200"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
                 {/* 새로고침 버튼 */}
                 <button
                     onClick={handleRefresh}
@@ -153,12 +187,11 @@ function Password() {
                     </svg>
                 </button>
             </div>
-            {!errorMessage && <p className="text-gray-600 mb-4">010을 제외한 전화번호 8자리를 입력해주세요!</p>}
-            {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
+            {errorMessage && <p className="text-[#B6C0C5] font-regular mt-10">{errorMessage}</p>}
             <button 
                 onClick={handleSubmit}
                 disabled={password.join('').length !== 8}
-                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 mt-10 ${
                     password.join('').length === 8 
                         ? 'bg-blue-500 text-white cursor-pointer' 
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
