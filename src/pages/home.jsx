@@ -1,9 +1,12 @@
 import {React, useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/logo.png';
 import Password from '../components/Password';
+import adminIcon from '../assets/adminIcon.png'
 
 
 function Home() {
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [isEventStarted, setIsEventStarted] = useState(false);
     const [eventStartTime, setEventStartTime] = useState(null);
@@ -54,8 +57,17 @@ function Home() {
         );
     }
 
+    const handleAdminIconClick = () => {
+        navigate('/login');
+        console.log('adminIcon clicked');
+    };
     return (
+        
         <div className='flex flex-col items-center justify-center w-screen'>
+             <img src={adminIcon} alt="adminIcon" 
+             className='absolute top-10 right-10 w-10 h-10 cursor-pointer' 
+             onClick={handleAdminIconClick}
+             />
             <img src={Logo} alt="logo" className='w-96' />
             
             {!isEventStarted ? (
