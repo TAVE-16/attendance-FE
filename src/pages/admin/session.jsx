@@ -4,11 +4,14 @@ import Logo from '../../assets/logo.png';
 import LoginInput from '../../components/loginInput';
 import backIcon from '../../assets/backIcon.png';
 import SessionBlock from '../../components/sessionBlock';
+import SessionModal from '../../components/sessionModal';
 
 function Session() {
   const sessions = ["OT", "전반기 만남의 장", "후반기 만남의 장", "전반기 시상식", "테런데이", "OB/현직자 강연", "후반기 컨퍼런스", "TAVE의 밤"];
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSessionName, setSelectedSessionName] = useState('');
 
   const handleDeleteMode = () => {
     setIsDeleteMode(true);
@@ -27,9 +30,21 @@ function Session() {
       setSelectedSessions([...selectedSessions, sessionName]);
     }
   };
+
+  const handleSessionClick = (sessionName) => {
+    if (!isDeleteMode) {
+      setSelectedSessionName(sessionName);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSessionName('');
+  };
     return (
         <div>
-             <Header />
+             <Header  />
         <div className=' w-screen mt-40 px-24'>
             <div className='flex items-center justify-between'>
             <h1 className="justify-start text-white text-2xl font-bold">정규세션</h1>
@@ -51,6 +66,7 @@ function Session() {
                         isDeleteMode={isDeleteMode}
                         isSelected={selectedSessions.includes(session)}
                         onSelect={() => handleSessionSelect(session)}
+                        onClick={() => handleSessionClick(session)}
                      />
                  ))}
              </div>
@@ -80,6 +96,12 @@ function Session() {
                 </div>
             )}
 
+            {/* 세션 모달 */}
+            <SessionModal 
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                sessionName={selectedSessionName}
+            />
             
         </div>
         </div>
