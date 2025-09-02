@@ -104,9 +104,9 @@ function Password() {
 
     return (
         <div className="text-center flex flex-col items-center justify-center">
+           
             <h1 className='text-2xl font-semibold text-white mt-10' >전화번호 8자리를 입력하세요.</h1>
             <div className="flex items-center justify-center gap-3 mt-10">
-                {/* 첫 번째 그룹: 0-3번 인덱스 */}
                 <div className="flex items-center gap-3">
                     {password.slice(0, 4).map((digit, index) => (
                         <div key={index} className="relative ">
