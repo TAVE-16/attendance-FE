@@ -44,7 +44,7 @@ function Session() {
   };
     return (
         <div>
-             <Header  />
+             <Header title="관리자 페이지" />
         <div className=' w-screen mt-40 px-24'>
             <div className='flex items-center justify-between'>
             <h1 className="justify-start text-white text-2xl font-bold">정규세션</h1>
