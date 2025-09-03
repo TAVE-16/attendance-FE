@@ -47,9 +47,15 @@ export default function Attendant() {
                 <Dropdown />
                 </div>
                 <div className="flex items-center gap-12 my-10">
-                    <Count type="출석" count="00"/>
-                    <Count type="지각" count="00"/>
-                    <Count type="결석" count="00"/>
+                    {activeTab === "전체 명단" ? (
+                        <>
+                            <Count type="출석" count="00"/>
+                            <Count type="지각" count="00"/>
+                            <Count type="결석" count="00"/>
+                        </>
+                    ) : (
+                        <Count type="출석" count="00"/>
+                    )}
                 </div>
                 <div className="flex items-center gap-12">
                     <AttendeeCard part="FE" name="김시은" status="지각"/>
