@@ -32,7 +32,7 @@ export default function SessionInput({
                     value={value}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className="w-full px-4 py-4 bg-blue-400/20 rounded-[10px] text-white placeholder-gray-400 focus:outline-none mt-4"
+                    className="w-full px-4 py-4 bg-blue-400/20 rounded-[10px] text-white text-lg font-bold placeholder-gray-500 placeholder-base placeholder-medium focus:outline-none mt-4"
                     required={required}
                 />
             
