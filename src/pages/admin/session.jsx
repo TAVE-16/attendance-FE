@@ -1,12 +1,11 @@
 import {React, useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/header';
-import Logo from '../../assets/logo.png';
-import LoginInput from '../../components/loginInput';
-import backIcon from '../../assets/backIcon.png';
 import SessionBlock from '../../components/sessionBlock';
 import SessionModal from '../../components/sessionModal';
 
 function Session() {
+  const navigate = useNavigate();
   const sessions = ["OT", "전반기 만남의 장", "후반기 만남의 장", "전반기 시상식", "테런데이", "OB/현직자 강연", "후반기 컨퍼런스", "TAVE의 밤"];
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
@@ -42,6 +41,10 @@ function Session() {
     setIsModalOpen(false);
     setSelectedSessionName('');
   };
+
+  const handleAddSession = () => {
+    navigate('/session/form');
+  };
     return (
         <div>
              <Header title="관리자 페이지" />
@@ -54,7 +57,11 @@ function Session() {
                     className="px-4 py-2 rounded-[10px] bg-gray-300 text-zinc-600 text-center justify-start text-base font-semibold whitespace-nowrap">
                     세션 삭제
                  </button>
-                <button className="px-4 py-2 bg-blue-600 rounded-[10px] text-center justify-start text-white text-base font-semibold">세션 추가</button>
+                <button 
+                    onClick={handleAddSession}
+                    className="px-4 py-2 bg-blue-600 rounded-[10px] text-center justify-start text-white text-base font-semibold hover:bg-blue-700 transition-colors">
+                  세션 추가
+                  </button>
             </div>
             </div>
            
