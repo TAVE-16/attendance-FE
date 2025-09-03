@@ -3,6 +3,9 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../../components/header';
 import backIcon from '../../assets/backIcon.png';
 import Tab from '../../components/tab';
+import Dropdown from '../../components/dropdown';
+import Count from '../../components/count';
+import AttendeeCard from '../../components/attendeeCard';
 
 export default function Attendant() {
     const [searchParams] = useSearchParams();
@@ -30,6 +33,7 @@ export default function Attendant() {
                 <span className="text-gray-300 text-2xl font-medium ">{sessionDate} {sessionTime}</span>
                 </div>
 
+                <div className="flex items-center justify-between">
                 <div className="flex items-center">
                     {tabList.map((tabName) => (
                         <Tab 
@@ -39,6 +43,17 @@ export default function Attendant() {
                             onClick={() => setActiveTab(tabName)} 
                         />
                     ))}
+                </div>
+                <Dropdown />
+                </div>
+                <div className="flex items-center gap-12 my-10">
+                    <Count type="출석" count="00"/>
+                    <Count type="지각" count="00"/>
+                    <Count type="결석" count="00"/>
+                </div>
+                <div className="flex items-center gap-12">
+                    <AttendeeCard part="FE" name="김시은" status="지각"/>
+                    <AttendeeCard part="DS" name="김지우" status="출석"/>
                 </div>
             </div>
         </div>
