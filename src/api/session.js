@@ -19,3 +19,12 @@ export async function putSession(id, requestBody) {
     const response = await client.put(`/v1/sessions/${id}`, requestBody);
     return response;
 }
+
+export async function getSessionMembers(sessionId, statusFilter = null) {
+    let url = `/v1/sessions/${sessionId}/members`;
+    if (statusFilter) {
+        url += `?status=${statusFilter}`;
+    }
+    const response = await client.get(url);
+    return response;
+}
