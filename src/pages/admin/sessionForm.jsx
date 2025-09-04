@@ -4,25 +4,67 @@ import SessionInput from '../../components/sessionInput';
 import backIcon from '../../assets/backIcon.png';
 import warningIcon from '../../assets/warningIcon.png';
 import closeIcon from '../../assets/closeIcon.png';
-import { postSession } from '../../api/session';
+import { postSession, putSession } from '../../api/session';
 
 function SessionForm() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     
-    const sessionName = searchParams.get('name');
-    const isEditMode = !!sessionName;
+    const sessionId = searchParams.get('id');
+    const sessionTitle = searchParams.get('title');
+    const sessionDate = searchParams.get('sessionDate');
+    const tardyTime = searchParams.get('tardyTime');
+    const earlyBirdDeadline = searchParams.get('earlyBirdDeadline');
+    const seminarTime = searchParams.get('seminarTime');
+    
+    const isEditMode = !!sessionId;
+    
+    // 시간 문자열을 객체로 변환하는 함수
+    const parseTimeString = (timeString) => {
+        if (!timeString) return { hour: 0, minute: 0, period: 'AM' };
+        
+        const [hour, minute] = timeString.split(':').map(Number);
+        let displayHour = hour;
+        let period = 'AM';
+        
+        if (hour === 0) {
+            displayHour = 12;
+            period = 'AM';
+        } else if (hour < 12) {
+            displayHour = hour;
+            period = 'AM';
+        } else if (hour === 12) {
+            displayHour = 12;
+            period = 'PM';
+        } else {
+            displayHour = hour - 12;
+            period = 'PM';
+        }
+        
+        return { hour: displayHour, minute, period };
+    };
+    
+    // 날짜 문자열을 Date 객체로 변환하는 함수
+    const parseDateString = (dateString) => {
+        if (!dateString) return null;
+        try {
+            return new Date(dateString);
+        } catch (error) {
+            console.error('날짜 파싱 오류:', error);
+            return null;
+        }
+    };
     
     const [formData, setFormData] = useState({
-        name: sessionName || '',
-        date: '',
+        name: sessionTitle || '',
+        date: parseDateString(sessionDate),
         description: ''
     });
 
     const [timeData, setTimeData] = useState({
-        lateTime: { hour: 0, minute: 0, period: 'AM' },
-        earlybirdEndTime: { hour: 0, minute: 0, period: 'AM' },
-        seminarStartTime: { hour: 0, minute: 0, period: 'AM' }
+        lateTime: parseTimeString(tardyTime),
+        earlybirdEndTime: parseTimeString(earlyBirdDeadline),
+        seminarStartTime: parseTimeString(seminarTime)
     });
 
     const [showWarningModal, setShowWarningModal] = useState(false);
@@ -105,7 +147,16 @@ function SessionForm() {
             };
 
    const formatTime = (timeObj) => {
-    const hour = timeObj.hour.toString().padStart(2, '0');
+    let hour24 = timeObj.hour;
+    
+    // 오전/오후를 24시간 형식으로 변환
+    if (timeObj.period === 'AM' && timeObj.hour === 12) {
+        hour24 = 0;
+    } else if (timeObj.period === 'PM' && timeObj.hour !== 12) {
+        hour24 = timeObj.hour + 12;
+    }
+    
+    const hour = hour24.toString().padStart(2, '0');
     const minute = timeObj.minute.toString().padStart(2, '0');
     return `${hour}:${minute}`;
 };
@@ -120,12 +171,21 @@ const requestData = {
 
 
             console.log('API 요청 데이터:', requestData);
-            const response = await postSession(requestData);
-            alert('세션 추가 성공');
+            
+            if (isEditMode) {
+                // 수정 모드: putSession API 호출
+                const response = await putSession(sessionId, requestData);
+                alert('세션 수정 성공');
+            } else {
+                // 추가 모드: postSession API 호출
+                const response = await postSession(requestData);
+                alert('세션 추가 성공');
+            }
+            
             navigate('/session');
         }
         catch (error) {
-            console.error('세션 추가 실패:', error);
+            console.error(isEditMode ? '세션 수정 실패:' : '세션 추가 실패:', error);
         }
     };
 

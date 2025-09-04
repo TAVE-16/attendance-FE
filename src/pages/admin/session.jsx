@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/header';
 import SessionBlock from '../../components/sessionBlock';
 import SessionModal from '../../components/sessionModal';
-import { getSessions } from '../../api/session';
+import { getSessions, deleteSession } from '../../api/session';
 function Session() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
@@ -69,6 +69,53 @@ function Session() {
     navigate('/session/form');
   };
 
+  const handleEditSession = () => {
+    // 선택된 세션의 전체 데이터 찾기
+    const selectedSession = sessions.find(session => session.title === selectedSessionName);
+    if (selectedSession) {
+      // 세션 데이터를 URL 파라미터로 전달
+      const params = new URLSearchParams({
+        id: selectedSession.id,
+        title: selectedSession.title,
+        sessionDate: selectedSession.sessionDate,
+        tardyTime: selectedSession.tardyTime,
+        earlyBirdDeadline: selectedSession.earlyBirdDeadline,
+        seminarTime: selectedSession.seminarTime
+      });
+      
+      navigate(`/session/form?${params.toString()}`);
+      handleCloseModal();
+    }
+  };
+
+  const handleDeleteSessions = async () => {
+    if (selectedSessions.length === 0) return;
+    
+    try {
+      // 선택된 세션들의 ID 찾기
+      const sessionsToDelete = sessions.filter(session => 
+        selectedSessions.includes(session.title)
+      );
+      
+      // 각 세션을 순차적으로 삭제
+      for (const session of sessionsToDelete) {
+        await deleteSession(session.id);
+      }
+      
+      // 삭제 후 세션 목록 새로고침
+      const response = await getSessions();
+      setSessions(response.data.data);
+      
+      setIsDeleteMode(false);
+      setSelectedSessions([]);
+      
+      alert('세션이 삭제되었습니다!');
+
+    } catch (error) {
+      console.error('세션 삭제 실패:', error);
+    }
+  };
+
     return (
         <div>
              <Header title="관리자 페이지" />
@@ -110,12 +157,7 @@ function Session() {
                         삭제 취소
                     </button>
                     <button 
-                        onClick={() => {
-                            if (selectedSessions.length > 0) {
-                                console.log('삭제할 세션들:', selectedSessions);
-                                handleCancelDelete();
-                            }
-                        }}
+                        onClick={handleDeleteSessions}
                         className={`px-16 py-2 rounded-[10px] text-center justify-start text-xl transition-all duration-300 ease-in-out ${
                             selectedSessions.length > 0 
                                 ? 'bg-blue-600 text-white font-semibold ' 
@@ -134,6 +176,7 @@ function Session() {
                 sessionName={selectedSessionName}
                 sessionDate={selectedSessionDate}
                 sessionTime={selectedSessionTime}
+                onEdit={handleEditSession}
             />
             
         </div>

@@ -23,12 +23,17 @@ export default function SessionInput({
         period: 'AM'
     });
 
-    // 부모 컴포넌트에서 전달된 timeValue가 변경될 때 로컬 state 업데이트
     useEffect(() => {
         if (propTimeValue) {
             setTimeValue(propTimeValue);
         }
     }, [propTimeValue]);
+
+    useEffect(() => {
+        if (type === "date" && value) {
+            setSelectedDate(value);
+        }
+    }, [value, type]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);

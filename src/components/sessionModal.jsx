@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '../assets/closeIcon.png';
 
-export default function SessionModal({ isOpen, onClose, sessionName, sessionDate, sessionTime }) {
+export default function SessionModal({ isOpen, onClose, sessionName, sessionDate, sessionTime, onEdit }) {
     const navigate = useNavigate();
     
     const handleAttendanceCheck = () => {
@@ -39,7 +39,10 @@ export default function SessionModal({ isOpen, onClose, sessionName, sessionDate
                         </div>
                    
                     <div className="flex gap-4 justify-center">
-                        <button className="px-12 py-2 bg-gray-300 rounded-[10px] text-zinc-600 text-xl font-medium">
+                        <button 
+                            onClick={onEdit}
+                            className="px-12 py-2 bg-gray-300 rounded-[10px] text-zinc-600 text-xl font-medium"
+                        >
                             세션수정
                         </button>
                                                  <button 
