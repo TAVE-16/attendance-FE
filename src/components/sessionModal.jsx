@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import closeIcon from '../assets/closeIcon.png';
 
-export default function SessionModal({ isOpen, onClose, sessionName }) {
+export default function SessionModal({ isOpen, onClose, sessionName, sessionDate, sessionTime }) {
     const navigate = useNavigate();
     
     const handleAttendanceCheck = () => {
         const sessionData = {
             name: sessionName,
-            date: '2025.08.30',
-            time: '13:00'
+            date: sessionDate,
+            time: sessionTime
         };
         
         const params = new URLSearchParams({
@@ -34,8 +34,8 @@ export default function SessionModal({ isOpen, onClose, sessionName }) {
                     <h2 className="text-2xl font-bold text-gray-800 mb-8">{sessionName}</h2>
                     <div className="flex items-center justify-center gap-2 my-9">
                         <span className="text-neutral-900 text-2xl font-medium">📅</span>
-                        <span className="text-neutral-900 text-xl font-medium">2025.08.30</span>
-                        <span className="text-gray-500 text-xl font-medium">13:00</span>
+                        <span className="text-neutral-900 text-xl font-medium">{sessionDate}</span>
+                        <span className="text-gray-500 text-xl font-medium">{sessionTime?.substring(0, 5)}</span>
                         </div>
                    
                     <div className="flex gap-4 justify-center">

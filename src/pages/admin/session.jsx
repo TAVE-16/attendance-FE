@@ -7,16 +7,24 @@ import { getSessions } from '../../api/session';
 function Session() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
-  // const sessions = ["OT", "전반기 만남의 장", "후반기 만남의 장", "전반기 시상식", "테런데이", "OB/현직자 강연", "후반기 컨퍼런스", "TAVE의 밤"];
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSessionName, setSelectedSessionName] = useState('');
+  const [selectedSessionDate, setSelectedSessionDate] = useState('');
+  const [selectedSessionTime, setSelectedSessionTime] = useState('');
 
   useEffect(() => {
-    const response = getSessions();
-    setSessions(response.data);
-    console.log(sessions);
+    const fetchSessions = async () => {
+      try {
+        const response = await getSessions();
+        setSessions(response.data.data);
+      } catch (error) {
+        console.error('세션 조회 실패:', error);
+      }
+    };
+    
+    fetchSessions();
   }, []);
 
   const handleDeleteMode = () => {
@@ -39,14 +47,22 @@ function Session() {
 
   const handleSessionClick = (sessionName) => {
     if (!isDeleteMode) {
-      setSelectedSessionName(sessionName);
-      setIsModalOpen(true);
+      // 선택된 세션의 데이터 찾기
+      const selectedSession = sessions.find(session => session.title === sessionName);
+      if (selectedSession) {
+        setSelectedSessionName(sessionName);
+        setSelectedSessionDate(selectedSession.sessionDate);
+        setSelectedSessionTime(selectedSession.tardyTime);
+        setIsModalOpen(true);
+      }
     }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedSessionName('');
+    setSelectedSessionDate('');
+    setSelectedSessionTime('');
   };
 
   const handleAddSession = () => {
@@ -76,12 +92,12 @@ function Session() {
                          <div className='flex flex-col items-center justify-center gap-4 mt-6 mb-20'>
                  {sessions?.map((session) => (
                      <SessionBlock 
-                        key={session}
-                        sessionName={session} 
+                        key={session.id}
+                        sessionName={session.title} 
                         isDeleteMode={isDeleteMode}
-                        isSelected={selectedSessions.includes(session)}
-                        onSelect={() => handleSessionSelect(session)}
-                        onClick={() => handleSessionClick(session)}
+                        isSelected={selectedSessions.includes(session.title)}
+                        onSelect={() => handleSessionSelect(session.title)}
+                        onClick={() => handleSessionClick(session.title)}
                      />
                  ))}
              </div>
@@ -116,6 +132,8 @@ function Session() {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 sessionName={selectedSessionName}
+                sessionDate={selectedSessionDate}
+                sessionTime={selectedSessionTime}
             />
             
         </div>
