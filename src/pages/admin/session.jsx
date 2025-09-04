@@ -52,6 +52,7 @@ function Session() {
   const handleAddSession = () => {
     navigate('/session/form');
   };
+
     return (
         <div>
              <Header title="관리자 페이지" />

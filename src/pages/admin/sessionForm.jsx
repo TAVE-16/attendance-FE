@@ -4,7 +4,7 @@ import SessionInput from '../../components/sessionInput';
 import backIcon from '../../assets/backIcon.png';
 import warningIcon from '../../assets/warningIcon.png';
 import closeIcon from '../../assets/closeIcon.png';
-
+import { postSession } from '../../api/session';
 
 function SessionForm() {
     const navigate = useNavigate();
@@ -40,6 +40,7 @@ function SessionForm() {
     };
 
     const handleTimeChange = (timeType, field, value) => {
+        // 시간 변경 시에는 검증 없이 상태만 업데이트
         if (field === 'formattedTime') {
             // 시간 문자열을 파싱하여 각 필드에 저장
             const [hourStr, minuteStr] = value.split(':');
@@ -70,6 +71,7 @@ function SessionForm() {
                 }
             }));
         } else {
+            // 개별 필드 변경 시에도 검증 없이 처리
             setTimeData(prev => ({
                 ...prev,
                 [timeType]: {
@@ -80,7 +82,7 @@ function SessionForm() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         // 필수 입력값 검증
@@ -94,14 +96,43 @@ function SessionForm() {
             return;
         }
 
-        console.log(isEditMode ? '세션 수정:' : '세션 추가:', { ...formData, timeData });
-        
-        navigate('/session');
+        try {
+            // 날짜 YYYY-MM-DD 형식
+            const formatDate = (dateString) => {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toISOString().split('T')[0];
+            };
+
+   const formatTime = (timeObj) => {
+    const hour = timeObj.hour.toString().padStart(2, '0');
+    const minute = timeObj.minute.toString().padStart(2, '0');
+    return `${hour}:${minute}`;
+};
+
+const requestData = {
+    title: formData.name,
+    sessionDate: formatDate(formData.date),
+    tardyTime: formatTime(timeData.lateTime),
+    earlyBirdDeadline: formatTime(timeData.earlybirdEndTime),
+    seminarTime: formatTime(timeData.seminarStartTime)
+};
+
+
+            console.log('API 요청 데이터:', requestData);
+            const response = await postSession(requestData);
+            alert('세션 추가 성공');
+            navigate('/session');
+        }
+        catch (error) {
+            console.error('세션 추가 실패:', error);
+        }
     };
 
     const handleCloseWarningModal = () => {
         setShowWarningModal(false);
     };
+
 
     return (
         <div>
@@ -127,7 +158,7 @@ function SessionForm() {
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="행사명을 입력해주세요"
-                            required={true}
+                            withCheck={true}
                             description={true}
                         />
 
@@ -138,7 +169,7 @@ function SessionForm() {
                             value={formData.date}
                             onChange={handleInputChange}
                              placeholder="행사 날짜를 선택해주세요"
-                            required={true}
+                            withCheck={true}
                         />
 
                         <SessionInput
@@ -148,7 +179,7 @@ function SessionForm() {
                             timeValue={timeData.lateTime}
                             onTimeChange={(field, value) => handleTimeChange('lateTime', field, value)}
                             placeholder="지각 시간을 설정해주세요"
-                            required={true}
+                            withCheck={true}
                         />
                         <SessionInput
                             label="얼리버드 종료 시간"
@@ -157,7 +188,7 @@ function SessionForm() {
                             timeValue={timeData.earlybirdEndTime}
                             onTimeChange={(field, value) => handleTimeChange('earlybirdEndTime', field, value)}
                             placeholder="얼리버드 종료 시간을 설정해주세요"
-                            required={true}
+                            withCheck={true}
                         />
                           <SessionInput
                             label="기술 세미나 시작 시간"
@@ -166,7 +197,7 @@ function SessionForm() {
                             timeValue={timeData.seminarStartTime}
                             onTimeChange={(field, value) => handleTimeChange('seminarStartTime', field, value)}
                             placeholder="기술 세미나 시작 시간을 설정해주세요"
-                            required={false}
+                            withCheck={false}
                         />
                     </div>
 
@@ -184,12 +215,18 @@ function SessionForm() {
             {/* 경고 모달 */}
             {showWarningModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg w-96 h-60 p-4 flex-col justify-center items-center gap-2.5">
-                   
-                   <img src={closeIcon} alt="warning" className="w-3.5 h-3.5 ml-auto mb-10 cursor-pointer" 
-                   onClick={handleCloseWarningModal}
-                   />
-                   <img src={warningIcon} alt="warning" className="w-12 h-12 mb-8 mx-auto" />
+                    <div className="bg-white rounded-lg w-96 h-56 p-4 flex flex-col justify-center items-center gap-2.5">
+                        <img 
+                            src={closeIcon} 
+                            alt="close" 
+                            className="w-3.5 h-3.5 ml-auto mb-10 cursor-pointer" 
+                            onClick={handleCloseWarningModal}
+                        />
+                        <img 
+                            src={warningIcon} 
+                            alt="warning" 
+                            className="w-12 h-12 mb-8 mx-auto" 
+                        />
                         <p className="text-black text-xl font-medium text-center">
                             필수 입력값을 입력해주세요
                         </p>

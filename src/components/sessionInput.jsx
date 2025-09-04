@@ -9,7 +9,7 @@ export default function SessionInput({
     value, 
     onChange, 
     placeholder, 
-    required = false,
+    withCheck = false,
     rows = 1,
     description = false,
     timeValue: propTimeValue,
@@ -17,7 +17,7 @@ export default function SessionInput({
 }) {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showTimeModal, setShowTimeModal] = useState(false);
-    const [timeValue, setTimeValue] = useState(propTimeValue || {
+    const [timeValue, setTimeValue] = useState({
         hour: 12,
         minute: 0,
         period: 'AM'
@@ -56,11 +56,6 @@ export default function SessionInput({
             [field]: value
         };
         setTimeValue(newTimeValue);
-        
-        // 부모 컴포넌트로 시간 변경 전달
-        if (propOnTimeChange) {
-            propOnTimeChange(field, value);
-        }
     };
 
     const handleTimeSave = () => {
@@ -87,9 +82,10 @@ export default function SessionInput({
         setShowTimeModal(false);
     };
 
-    // 시간 표시용 문자열 생성
+    // 시간 표시용 문자열 생성 (부모 컴포넌트의 propTimeValue 기준)
     const getTimeDisplayString = () => {
-        const { hour, minute, period } = timeValue;
+        const timeData = propTimeValue || { hour: 0, minute: 0, period: 'AM' };
+        const { hour, minute, period } = timeData;
         if (hour === 0 && minute === 0) return '';
         
         let displayHour = hour;
@@ -164,14 +160,14 @@ export default function SessionInput({
             {description && (
                 <div className="flex items-center justify-between gap-3">
                     <label className="text-white text-xl font-medium">
-                        {label} {required && "*"}
+                        {label} {withCheck && "*"}
                     </label>
                     <span className="text-neutral-400 text-base font-medium">*는 필수 입력 값입니다</span>
                 </div>
             )}
             {!description && (
                 <label className="text-white text-xl font-medium">
-                    {label} {required && "*"}
+                    {label} {withCheck && "*"}
                 </label>
             )}
             
@@ -196,7 +192,6 @@ export default function SessionInput({
                         onClick={handleTimeInputClick}
                         placeholder={placeholder}
                         className="w-full px-4 py-4 bg-blue-400/20 rounded-[10px] text-white text-lg font-bold placeholder-gray-500 placeholder-base placeholder-medium focus:outline-none cursor-pointer"
-                        required={required}
                         readOnly
                     />
                     
@@ -212,6 +207,7 @@ export default function SessionInput({
                                     <div className="flex flex-col items-center">
                                         <div className="flex items-center flex-col mr-8">
                                             <button
+                                                type="button"
                                                 onClick={() => handleTimeChange('period', 'AM')}
                                                 className={`px-6 py-1 rounded-t-lg rounded-b-none text-lg font-semibold ${
                                                     timeValue.period === 'AM' 
@@ -222,6 +218,7 @@ export default function SessionInput({
                                                 오전
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => handleTimeChange('period', 'PM')}
                                                 className={`px-6 py-1 rounded-t-none rounded-b-lg text-lg font-semibold ${
                                                     timeValue.period === 'PM' 
@@ -234,7 +231,6 @@ export default function SessionInput({
                                         </div>
                                     </div>
                                     
-                                    {/* 시간 선택 */}
                                     <div className="flex flex-col items-center">
                                         <input
                                             type="text"
@@ -259,7 +255,7 @@ export default function SessionInput({
                                         />
                                     </div>
                                     <span className="text-neutral-700 text-4xl font-medium">:</span>
-                                    {/* 분 선택 */}
+
                                     <div className="flex flex-col items-center">
                                         <input
                                             type="text"
@@ -292,12 +288,14 @@ export default function SessionInput({
                                 
                                 <div className="flex justify-end gap-4 mt-12">
                                     <button
+                                        type="button"
                                         onClick={handleTimeCancel}
                                         className="w-28 h-12 py-1.5 bg-gray-300 rounded-[10px] text-zinc-600 text-lg font-semibold"
                                     >
                                         취소
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={handleTimeSave}
                                         className="w-28 h-12 py-[5px] bg-blue-600 text-white text-lg font-semibold"
                                     >
@@ -316,7 +314,6 @@ export default function SessionInput({
                     onChange={onChange}
                     placeholder={placeholder}
                     className="w-full px-4 py-4 bg-blue-400/20 rounded-[10px] text-white text-lg font-bold placeholder-gray-500 placeholder-base placeholder-medium focus:outline-none mt-4"
-                    required={required}
                 />
             )}
         </div>
