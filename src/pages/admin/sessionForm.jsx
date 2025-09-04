@@ -13,8 +13,13 @@ function SessionForm() {
     const [formData, setFormData] = useState({
         name: sessionName || '',
         date: '',
-        time: '',
         description: ''
+    });
+
+    const [timeData, setTimeData] = useState({
+        lateTime: { hour: 0, minute: 0, period: 'AM' },
+        earlybirdEndTime: { hour: 0, minute: 0, period: 'AM' },
+        seminarStartTime: { hour: 0, minute: 0, period: 'AM' }
     });
 
     const handleBackClick = () => {
@@ -27,6 +32,47 @@ function SessionForm() {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleTimeChange = (timeType, field, value) => {
+        if (field === 'formattedTime') {
+            // 시간 문자열을 파싱하여 각 필드에 저장
+            const [hourStr, minuteStr] = value.split(':');
+            const hour24 = parseInt(hourStr);
+            const minute = parseInt(minuteStr);
+            
+            let hour12, period;
+            if (hour24 === 0) {
+                hour12 = 12;
+                period = 'AM';
+            } else if (hour24 < 12) {
+                hour12 = hour24;
+                period = 'AM';
+            } else if (hour24 === 12) {
+                hour12 = 12;
+                period = 'PM';
+            } else {
+                hour12 = hour24 - 12;
+                period = 'PM';
+            }
+            
+            setTimeData(prev => ({
+                ...prev,
+                [timeType]: {
+                    hour: hour12,
+                    minute: minute,
+                    period: period
+                }
+            }));
+        } else {
+            setTimeData(prev => ({
+                ...prev,
+                [timeType]: {
+                    ...prev[timeType],
+                    [field]: value
+                }
+            }));
+        }
     };
 
     const handleSubmit = (e) => {
@@ -42,12 +88,9 @@ function SessionForm() {
             return;
         }
         
-        if (!formData.time) {
-            alert('시간을 입력해주세요.');
-            return;
-        }
+        // 시간 검증은 각각의 시간 필드에서 개별적으로 처리
 
-        console.log(isEditMode ? '세션 수정:' : '세션 추가:', formData);
+        console.log(isEditMode ? '세션 수정:' : '세션 추가:', { ...formData, timeData });
         
         navigate('/session');
     };
@@ -92,28 +135,28 @@ function SessionForm() {
 
                         <SessionInput
                             label="지각 시간"
-                            name="time"
+                            name="lateTime"
                             type="time"
-                            value={formData.time}
-                            onChange={handleInputChange}
+                            timeValue={timeData.lateTime}
+                            onTimeChange={(field, value) => handleTimeChange('lateTime', field, value)}
                             placeholder="지각 시간을 설정해주세요"
                             required={true}
                         />
                         <SessionInput
                             label="얼리버드 종료 시간"
-                            name="time"
+                            name="earlybirdEndTime"
                             type="time"
-                            value={formData.time}
-                            onChange={handleInputChange}
+                            timeValue={timeData.earlybirdEndTime}
+                            onTimeChange={(field, value) => handleTimeChange('earlybirdEndTime', field, value)}
                             placeholder="얼리버드 종료 시간을 설정해주세요"
                             required={true}
                         />
                           <SessionInput
                             label="기술 세미나 시작 시간"
-                            name="time"
+                            name="seminarStartTime"
                             type="time"
-                            value={formData.time}
-                            onChange={handleInputChange}
+                            timeValue={timeData.seminarStartTime}
+                            onTimeChange={(field, value) => handleTimeChange('seminarStartTime', field, value)}
                             placeholder="기술 세미나 시작 시간을 설정해주세요"
                             required={true}
                         />

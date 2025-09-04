@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import navArrow from '../assets/navArrow.png';
 
@@ -11,9 +11,24 @@ export default function SessionInput({
     placeholder, 
     required = false,
     rows = 1,
-    description = false
+    description = false,
+    timeValue: propTimeValue,
+    onTimeChange: propOnTimeChange
 }) {
     const [selectedDate, setSelectedDate] = useState(null);
+    const [showTimeModal, setShowTimeModal] = useState(false);
+    const [timeValue, setTimeValue] = useState(propTimeValue || {
+        hour: 12,
+        minute: 0,
+        period: 'AM'
+    });
+
+    // 부모 컴포넌트에서 전달된 timeValue가 변경될 때 로컬 state 업데이트
+    useEffect(() => {
+        if (propTimeValue) {
+            setTimeValue(propTimeValue);
+        }
+    }, [propTimeValue]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -27,6 +42,64 @@ export default function SessionInput({
             };
             onChange(event);
         }
+    };
+
+    const handleTimeInputClick = () => {
+        if (type === "time") {
+            setShowTimeModal(true);
+        }
+    };
+
+    const handleTimeChange = (field, value) => {
+        const newTimeValue = {
+            ...timeValue,
+            [field]: value
+        };
+        setTimeValue(newTimeValue);
+        
+        // 부모 컴포넌트로 시간 변경 전달
+        if (propOnTimeChange) {
+            propOnTimeChange(field, value);
+        }
+    };
+
+    const handleTimeSave = () => {
+        const { hour, minute, period } = timeValue;
+        let displayHour = hour;
+        
+        if (period === 'AM' && hour === 12) {
+            displayHour = 0;
+        } else if (period === 'PM' && hour !== 12) {
+            displayHour = hour + 12;
+        }
+        
+        const timeString = `${displayHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        
+        // 부모 컴포넌트로 시간 변경 전달
+        if (propOnTimeChange) {
+            propOnTimeChange('formattedTime', timeString);
+        }
+        
+        setShowTimeModal(false);
+    };
+
+    const handleTimeCancel = () => {
+        setShowTimeModal(false);
+    };
+
+    // 시간 표시용 문자열 생성
+    const getTimeDisplayString = () => {
+        const { hour, minute, period } = timeValue;
+        if (hour === 0 && minute === 0) return '';
+        
+        let displayHour = hour;
+        if (period === 'AM' && hour === 12) {
+            displayHour = 0;
+        } else if (period === 'PM' && hour !== 12) {
+            displayHour = hour + 12;
+        }
+        
+        return `${displayHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     };
 
     const formatMonthYear = (date) => {
@@ -113,6 +186,127 @@ export default function SessionInput({
                         dateFormat="yyyy. MM. dd"
                         renderCustomHeader={renderCustomHeader}
                     />
+                </div>
+            ) : type === "time" ? (
+                <div className="mt-4">
+                    <input
+                        type="text"
+                        name={name}
+                        value={getTimeDisplayString()}
+                        onClick={handleTimeInputClick}
+                        placeholder={placeholder}
+                        className="w-full px-4 py-4 bg-blue-400/20 rounded-[10px] text-white text-lg font-bold placeholder-gray-500 placeholder-base placeholder-medium focus:outline-none cursor-pointer"
+                        required={required}
+                        readOnly
+                    />
+                    
+                    {/* 시간 선택 모달 */}
+                    {showTimeModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg w-[490px] px-11 py-7">
+                                <h3 className="text-black text-xl font-semibold mb-8 text-center">
+                                    {label}
+                                </h3>
+                                
+                                <div className="flex items-center justify-center gap-4 mb-6">
+                                    <div className="flex flex-col items-center">
+                                        <div className="flex items-center flex-col mr-8">
+                                            <button
+                                                onClick={() => handleTimeChange('period', 'AM')}
+                                                className={`px-6 py-1 rounded-t-lg rounded-b-none text-lg font-semibold ${
+                                                    timeValue.period === 'AM' 
+                                                        ? 'bg-blue-600 text-white' 
+                                                        : 'bg-white text-neutral-300  border-l border-r border-b border-gray-300'
+                                                }`}
+                                            >
+                                                오전
+                                            </button>
+                                            <button
+                                                onClick={() => handleTimeChange('period', 'PM')}
+                                                className={`px-6 py-1 rounded-t-none rounded-b-lg text-lg font-semibold ${
+                                                    timeValue.period === 'PM' 
+                                                        ? 'bg-blue-600 text-white' 
+                                                        : 'bg-white text-neutral-300  border-l border-r border-b border-gray-300'
+                                                }`}
+                                            >
+                                                오후
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* 시간 선택 */}
+                                    <div className="flex flex-col items-center">
+                                        <input
+                                            type="text"
+                                            value={timeValue.hour}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                // 숫자만 입력 허용
+                                                if (/^\d*$/.test(value)) {
+                                                    if (value === '') {
+                                                        handleTimeChange('hour', 0);
+                                                    } else {
+                                                        const numValue = parseInt(value);
+                                                        if (numValue >= 1 && numValue <= 12) {
+                                                            handleTimeChange('hour', numValue);
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                            maxLength="2"
+                                            className="w-28 py-5 bg-white rounded-[10px] outline outline-1 outline-offset-[-1px] outline-gray-200 text-center text-neutral-700 text-3xl font-medium"
+                                            placeholder="12"
+                                        />
+                                    </div>
+                                    <span className="text-neutral-700 text-4xl font-medium">:</span>
+                                    {/* 분 선택 */}
+                                    <div className="flex flex-col items-center">
+                                        <input
+                                            type="text"
+                                            value={timeValue.minute === 0 ? '' : timeValue.minute.toString()}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (/^\d*$/.test(value)) {
+                                                    if (value === '') {
+                                                        handleTimeChange('minute', 0);
+                                                    } else {
+                                                        const numValue = parseInt(value);
+                                                        if (numValue >= 0 && numValue <= 59) {
+                                                            handleTimeChange('minute', numValue);
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                // 2자리 포맷팅 (00 형식)
+                                                if (timeValue.minute > 0) {
+                                                    e.target.value = timeValue.minute.toString().padStart(2, '0');
+                                                }
+                                            }}
+                                            maxLength="2"
+                                            className="w-28 py-5 bg-white rounded-[10px] outline outline-1 outline-offset-[-1px] outline-gray-200 text-center text-neutral-700 text-3xl font-medium"
+                                            placeholder="00"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-4 mt-12">
+                                    <button
+                                        onClick={handleTimeCancel}
+                                        className="w-28 h-12 py-1.5 bg-gray-300 rounded-[10px] text-zinc-600 text-lg font-semibold"
+                                    >
+                                        취소
+                                    </button>
+                                    <button
+                                        onClick={handleTimeSave}
+                                        className="w-28 h-12 py-[5px] bg-blue-600 text-white text-lg font-semibold"
+                                    >
+                                        저장
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <input
