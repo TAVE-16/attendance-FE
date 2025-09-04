@@ -25,10 +25,11 @@ export default function Attendant() {
     const tabList = ["전체 명단", "일반 출석", "얼리버드", "기술 세미나", "지각/결석"];
     const [activeTab, setActiveTab] = useState("전체 명단");
     const [members, setMembers] = useState([]);
+    const [selectedField, setSelectedField] = useState(null);
 
-    const handleGetSessionMembers = async (statusFilter = null) => {
+    const handleGetSessionMembers = async (statusFilter = null, fieldFilter = null) => {
         try {
-            const response = await getSessionMembers(13, statusFilter);
+            const response = await getSessionMembers(13, statusFilter, fieldFilter);
             setMembers(response.data.data);
             console.log(response);
         } catch (error) {
@@ -36,11 +37,9 @@ export default function Attendant() {
         }
     };
 
-    // 탭 변경 핸들러
     const handleTabChange = (tabName) => {
         setActiveTab(tabName);
         
-        // 탭에 따른 상태 필터 매핑
         let statusFilter = null;
         if (tabName === '일반 출석') {
             statusFilter = 'ATTENDANCE';
@@ -48,17 +47,31 @@ export default function Attendant() {
             statusFilter = 'EARLY_BIRD';
         } else if (tabName === '지각/결석') {
             statusFilter = 'ABSENT';
+            //기술세미나는?
         }
-        // '전체 명단'과 '기술 세미나'는 필터 없이 전체 조회
+
+        handleGetSessionMembers(statusFilter, selectedField);
+    };
+
+    const handleFieldChange = (fieldLabel) => {
+        setSelectedField(fieldLabel);
         
-        handleGetSessionMembers(statusFilter);
+        let statusFilter = null;
+        if (activeTab === '일반 출석') {
+            statusFilter = 'ATTENDANCE';
+        } else if (activeTab === '얼리버드') {
+            statusFilter = 'EARLY_BIRD';
+        } else if (activeTab === '지각/결석') {
+            statusFilter = 'ABSENT';
+        }
+        
+        handleGetSessionMembers(statusFilter, fieldLabel);
     };
 
     useEffect(() => {
         handleGetSessionMembers();
     }, []);
 
-    // field를 두글자 코드로 변환하는 함수
     const getFieldCode = (field) => {
         const fieldMapping = {
             'WEBFRONTEND': 'FE',
@@ -70,8 +83,6 @@ export default function Attendant() {
         };
         return fieldMapping[field] || field;
     };
-
-    // status를 한글로 변환하는 함수
     const getStatusText = (status) => {
         const statusMapping = {
             'ATTENDANCE': '출석',
@@ -82,10 +93,26 @@ export default function Attendant() {
         return statusMapping[status] || status;
     };
 
+    // 상태별 카운트 계산 함수
+    const getStatusCounts = () => {
+        const attendanceCount = members.filter(member => member.status === 'ATTENDANCE').length;
+        const tardyCount = members.filter(member => member.status === 'TARDY').length;
+        const absentCount = members.filter(member => member.status === 'ABSENT').length;
+        const earlyBirdCount = members.filter(member => member.status === 'EARLY_BIRD').length;
+        return {
+            attendance: attendanceCount,
+            tardy: tardyCount,
+            absent: absentCount,
+            earlyBird: earlyBirdCount
+        };
+    };
+
+    const statusCounts = getStatusCounts();
+
     return (
         <div>
             <Header title="출석 현황" />
-            <div className="w-screen mt-40 px-24">
+            <div className="w-screen mt-40 px-24 ">
                
                 <div className="flex items-center gap-4 text-gray-600 mb-10">
                 <img src={backIcon} alt="back" className="w-6 h-6 cursor-pointer" onClick={handleBackClick} />
@@ -104,20 +131,33 @@ export default function Attendant() {
                         />
                     ))}
                 </div>
-                <Dropdown />
+                <Dropdown onChange={handleFieldChange} />
                 </div>
                 <div className="flex items-center gap-12 my-10">
-                    {activeTab === "전체 명단" ? (
+                    {activeTab === "전체 명단" && (
                         <>
-                            <Count type="출석" count="00"/>
-                            <Count type="지각" count="00"/>
-                            <Count type="결석" count="00"/>
+                            <Count type="출석" count={statusCounts.attendance.toString().padStart(2, '0')}/>
+                            <Count type="지각" count={statusCounts.tardy.toString().padStart(2, '0')}/>
+                            <Count type="결석" count={statusCounts.absent.toString().padStart(2, '0')}/>
                         </>
-                    ) : (
-                        <Count type="출석" count="00"/>
+                    )}
+                    {activeTab === "일반 출석" && (
+                        <Count type="출석" count={statusCounts.attendance.toString().padStart(2, '0')}/>
+                    )}
+                    {activeTab === "얼리버드" && (
+                        <Count type="얼리버드" count={statusCounts.earlyBird.toString().padStart(2, '0')}/>
+                    )}
+                    {activeTab === "기술 세미나" && (
+                        <Count type="출석" count={statusCounts.attendance.toString().padStart(2, '0')}/>
+                    )}
+                    {activeTab === "지각/결석" && (
+                        <>
+                            <Count type="지각" count={statusCounts.tardy.toString().padStart(2, '0')}/>
+                            <Count type="결석" count={statusCounts.absent.toString().padStart(2, '0')}/>
+                        </>
                     )}
                 </div>
-                <div className="grid grid-cols-3 items-center gap-12 flex-wrap mb-20">
+                <div className="grid grid-cols-3 items-center gap-12 flex-wrap mb-20 min-h-[500px]">
                     {members.map((member) => (
                         <AttendeeCard 
                             key={member.memberId}

@@ -20,11 +20,28 @@ export async function putSession(id, requestBody) {
     return response;
 }
 
-export async function getSessionMembers(sessionId, statusFilter = null) {
+export async function getSessionMembers(sessionId, statusFilter = null, fieldFilter = null) {
     let url = `/v1/sessions/${sessionId}/members`;
+    const params = new URLSearchParams();
+    
     if (statusFilter) {
-        url += `?status=${statusFilter}`;
+        params.append('status', statusFilter);
     }
+    if (fieldFilter) {
+        // 프론트엔드는 배열이므로 둘 다 추가
+        if (Array.isArray(fieldFilter)) {
+            fieldFilter.forEach(field => {
+                params.append('field', field);
+            });
+        } else {
+            params.append('field', fieldFilter);
+        }
+    }
+    
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+    
     const response = await client.get(url);
     return response;
 }
