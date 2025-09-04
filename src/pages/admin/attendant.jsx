@@ -29,7 +29,7 @@ export default function Attendant() {
 
     const handleGetSessionMembers = async (statusFilter = null, fieldFilter = null) => {
         try {
-            const response = await getSessionMembers(13, statusFilter, fieldFilter);
+            const response = await getSessionMembers(17, statusFilter, fieldFilter);
             setMembers(response.data.data);
             console.log(response);
         } catch (error) {
@@ -95,7 +95,7 @@ export default function Attendant() {
 
     // 상태별 카운트 계산 함수
     const getStatusCounts = () => {
-        const attendanceCount = members.filter(member => member.status === 'ATTENDANCE').length;
+        const attendanceCount = members.filter(member => member.status === 'ATTENDANCE').length + members.filter(member => member.status === 'EARLY_BIRD').length;
         const tardyCount = members.filter(member => member.status === 'TARDY').length;
         const absentCount = members.filter(member => member.status === 'ABSENT').length;
         const earlyBirdCount = members.filter(member => member.status === 'EARLY_BIRD').length;
@@ -157,7 +157,7 @@ export default function Attendant() {
                         </>
                     )}
                 </div>
-                <div className="grid grid-cols-3 items-center gap-12 flex-wrap mb-20 min-h-[500px]">
+                <div className="grid grid-cols-3 items-start gap-12 flex-wrap mb-20 h-[500px] overflow-y-auto overflow-x-hidden">
                     {members.map((member) => (
                         <AttendeeCard 
                             key={member.memberId}
