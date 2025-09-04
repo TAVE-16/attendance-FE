@@ -215,11 +215,11 @@ const requestData = {
             {/* 경고 모달 */}
             {showWarningModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg w-96 h-56 p-4 flex flex-col justify-center items-center gap-2.5">
+                    <div className="bg-white rounded-lg w-96 h-56 p-4 flex flex-col items-center gap-2.5">
                         <img 
                             src={closeIcon} 
                             alt="close" 
-                            className="w-3.5 h-3.5 ml-auto mb-10 cursor-pointer" 
+                            className="w-3.5 h-3.5 ml-auto mb-4 cursor-pointer" 
                             onClick={handleCloseWarningModal}
                         />
                         <img 
