@@ -25,9 +25,7 @@ function Modal({ isOpen, onClose, phoneNumber }) {
                     <h2 className="text-xl font-bold text-gray-800 mb-2">
                         출석 완료!
                     </h2>
-                    <p className="text-gray-600">
-                        김시은님 출석이 완료되었습니다!
-                    </p>
+                   
                 </div>
                 <button
                     onClick={onClose}

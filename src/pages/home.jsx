@@ -59,7 +59,6 @@ function Home() {
 
     const handleAdminIconClick = () => {
         navigate('/login');
-        console.log('adminIcon clicked');
     };
     return (
         

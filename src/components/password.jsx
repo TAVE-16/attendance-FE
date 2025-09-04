@@ -4,6 +4,7 @@ import PWIcon2 from '../assets/pwIcon2.png'
 import PWIcon3 from '../assets/pwIcon3.png'
 import PWIcon4 from '../assets/pwIcon4.png'
 import Modal from './modal.jsx'
+import { postAttendant } from '../api/attendant';
 
 function Password() {
     const [password, setPassword] = useState(['', '', '', '', '', '', '', '']);
@@ -55,20 +56,22 @@ function Password() {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const fullPassword = password.join('');
         
         if (fullPassword.length === 8) {
-            // 000000 에러 체크-> 나중에 없는 번호일때 띄우기
-            if (fullPassword === '00000000') {
-                setErrorMessage('번호를 다시 입력하세요!');
-                return;
-            }
             
-          
-            const formattedPhoneNumber = fullPassword.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            setCompletedPhoneNumber(formattedPhoneNumber);
-            setShowModal(true);
+            try {
+                const response = await postAttendant({ phoneNumber: fullPassword });
+                console.log('출석 등록 성공:', response);
+                
+                const formattedPhoneNumber = fullPassword.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+                setCompletedPhoneNumber(formattedPhoneNumber);
+                setShowModal(true);
+            } catch (error) {
+                console.error('출석 등록 실패:', error);
+                setErrorMessage('일치하는 번호가 없습니다. 번호를 다시 입력해주세요.');
+            }
         } else {
             setErrorMessage('비밀번호가 8자리가 아닙니다.');
         }
