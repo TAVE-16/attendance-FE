@@ -3,14 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/header';
 import SessionBlock from '../../components/sessionBlock';
 import SessionModal from '../../components/sessionModal';
-
+import { getSessions } from '../../api/session';
 function Session() {
   const navigate = useNavigate();
-  const sessions = ["OT", "전반기 만남의 장", "후반기 만남의 장", "전반기 시상식", "테런데이", "OB/현직자 강연", "후반기 컨퍼런스", "TAVE의 밤"];
+  const [sessions, setSessions] = useState([]);
+  // const sessions = ["OT", "전반기 만남의 장", "후반기 만남의 장", "전반기 시상식", "테런데이", "OB/현직자 강연", "후반기 컨퍼런스", "TAVE의 밤"];
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedSessions, setSelectedSessions] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSessionName, setSelectedSessionName] = useState('');
+
+  useEffect(() => {
+    const response = getSessions();
+    setSessions(response.data);
+    console.log(sessions);
+  }, []);
 
   const handleDeleteMode = () => {
     setIsDeleteMode(true);
@@ -66,7 +73,7 @@ function Session() {
             </div>
            
                          <div className='flex flex-col items-center justify-center gap-4 mt-6 mb-20'>
-                 {sessions.map((session) => (
+                 {sessions?.map((session) => (
                      <SessionBlock 
                         key={session}
                         sessionName={session} 

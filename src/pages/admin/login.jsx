@@ -30,6 +30,14 @@ function Login() {
         try {
             const response = await postLogin(formData.email, formData.password);
             console.log('로그인 성공:', response);
+            
+            if (response.data && response.data.data && response.data.data.accessToken) {
+                const accessToken = response.data.data.accessToken;
+                localStorage.setItem('accessToken', accessToken);
+            } else {
+                console.warn('응답에서 토큰을 찾을 수 없습니다:', response.data);
+            }
+            
             navigate('/session');
         } catch (error) {
             console.error('로그인 실패:', error);
