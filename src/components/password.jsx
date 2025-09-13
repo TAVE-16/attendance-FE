@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PWIcon1 from '../assets/pwIcon1.png'
 import PWIcon2 from '../assets/pwIcon2.png'
 import PWIcon3 from '../assets/pwIcon3.png'
@@ -53,29 +53,39 @@ function Password() {
                     if (prevInput) prevInput.focus();
                 }, 10);
             }
+        } else if (e.key === 'Enter' || e.keyCode === 13 || e.which === 13) {
+            // 엔터키를 누르면 출석 처리
+            handleSubmit();
         }
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         const fullPassword = password.join('');
         
         if (fullPassword.length === 8) {
-            
             try {
                 const response = await postAttendant({ phoneNumber: fullPassword });
-                console.log('출석 등록 성공:', response);
                 
                 const formattedPhoneNumber = fullPassword.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
                 setCompletedPhoneNumber(formattedPhoneNumber);
                 setShowModal(true);
             } catch (error) {
-                console.error('출석 등록 실패:', error);
                 setErrorMessage('일치하는 번호가 없습니다. 번호를 다시 입력해주세요.');
             }
         } else {
             setErrorMessage('비밀번호가 8자리가 아닙니다.');
         }
-    };
+    }, [password]);
+
+    // 8자리 입력 완료 시 자동 출석 처리
+    useEffect(() => {
+        const fullPassword = password.join('');
+        if (fullPassword.length === 8 && password.every(digit => digit !== '')) {
+            setTimeout(() => {
+                handleSubmit();
+            }, 100);
+        }
+    }, [password, handleSubmit]);
 
     const handleModalClose = () => {
         setShowModal(false);
@@ -108,7 +118,7 @@ function Password() {
     return (
         <div className="text-center flex flex-col items-center justify-center">
            
-            <h1 className='text-2xl font-semibold text-white mt-10' >전화번호 8자리를 입력하세요.</h1>
+            <h1 className='text-2xl font-semibold text-white mt-10' >전화번호 뒷자리 8자리를 입력하세요.</h1>
             <div className="flex items-center justify-center gap-3 mt-10">
                 <div className="flex items-center gap-3">
                     {password.slice(0, 4).map((digit, index) => (
@@ -191,17 +201,6 @@ function Password() {
                 </button>
             </div>
             {errorMessage && <p className="text-[#B6C0C5] font-regular mt-10">{errorMessage}</p>}
-            <button 
-                onClick={handleSubmit}
-                disabled={password.join('').length !== 8}
-                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 mt-10 ${
-                    password.join('').length === 8 
-                        ? 'bg-blue-500 text-white cursor-pointer' 
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-            >
-                출석!
-            </button>
            
             <Modal 
                 isOpen={showModal} 
